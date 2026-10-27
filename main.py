@@ -6,6 +6,7 @@ Performs staged branch-and-bound pruning, short-haul leg pricing, ranking, and s
 import argparse
 import csv
 import logging
+import shlex
 from datetime import datetime, timedelta
 from typing import Dict, List, Any, Tuple, Optional
 import yaml
@@ -99,7 +100,46 @@ def plan_all_queries(start_dates: List[str], config: Dict[str, Any]) -> Tuple[Li
     return stage1_queries, stage3_queries
 
 
-def print_dry_run(start_dates: List[str], config: Dict[str, Any], cache: FlightCache):
+def build_live_command(args: argparse.Namespace, stage: Optional[str] = None) -> str:
+    """Build a repeatable CLI command from the current dry-run options."""
+    command = ["main.py", "--config", args.config]
+    if args.start_date:
+        command.extend(["--start-date", args.start_date])
+    if args.end_date:
+        command.extend(["--end-date", args.end_date])
+    if args.max_requests is not None:
+        command.extend(["--max-requests", str(args.max_requests)])
+    if args.output_csv != "results.csv":
+        command.extend(["--output-csv", args.output_csv])
+    if args.no_cache:
+        command.append("--no-cache")
+    if stage:
+        command.extend(["--stage", stage])
+    return shlex.join(command)
+
+
+def print_next_steps(args: argparse.Namespace):
+    """Print copy-and-pasteable commands after a dry run."""
+    full_run = build_live_command(args)
+    print("\nNEXT STEPS")
+    print("=" * 70)
+    if args.no_cache:
+        print("Run all stages (1–4):")
+        print(f'  docker run --rm -v "$(pwd)":/app flights-finder {full_run}')
+        print("Caching is disabled, so this run cannot be resumed from cached results.")
+        return
+
+    stage_one = build_live_command(args, stage="1")
+    print("1. Fetch long-haul flights and apply Stage 2 pruning:")
+    print(f'   docker run --rm -v "$(pwd)":/app flights-finder {stage_one}')
+    print("2. Resume from the cache and complete Stages 3–4:")
+    print(f'   docker run --rm -v "$(pwd)":/app flights-finder {full_run}')
+    print("The second command rechecks Stage 1 from the cache; cached routes make no network requests.")
+
+
+def print_dry_run(
+    start_dates: List[str], config: Dict[str, Any], cache: FlightCache, args: argparse.Namespace
+):
     s1_queries, s3_queries = plan_all_queries(start_dates, config)
     uniq_s1 = list(dict.fromkeys((q[1], q[2], q[3]) for q in s1_queries))
     uniq_s3 = list(dict.fromkeys((q[1], q[2], q[3]) for q in s3_queries))
@@ -137,6 +177,7 @@ def print_dry_run(start_dates: List[str], config: Dict[str, Any], cache: FlightC
     print(f"\nBranch & Bound Pruning Policy: Keep top {keep_top} dates within €{slack} slack of best long-haul cost.")
     print("Stage 3 will ONLY query surviving dates, significantly cutting short-haul queries.")
     print("=" * 70)
+    print_next_steps(args)
 
 
 def run_stage1(
@@ -600,7 +641,12 @@ def main():
     parser.add_argument("--end-date", help="Override end date (YYYY-MM-DD)")
     parser.add_argument("--dry-run", action="store_true", help="Print planned query count without fetching")
     parser.add_argument("--max-requests", type=int, default=None, help="Stop after N network requests")
-    parser.add_argument("--stage", default="all", help="Stage to run: 1, 2, 3, 4, or all")
+    parser.add_argument(
+        "--stage",
+        choices=["1", "2", "all"],
+        default="all",
+        help="Stop after Stage 2 pruning (1 or 2), or run all stages (default: all)",
+    )
     parser.add_argument("--output-csv", default="results.csv", help="CSV output file")
     parser.add_argument("--no-cache", action="store_true", help="Do not load/save disk cache")
 
@@ -619,7 +665,7 @@ def main():
     cache = FlightCache(cache_file=cache_file)
 
     if args.dry_run:
-        print_dry_run(start_dates, config, cache)
+        print_dry_run(start_dates, config, cache, args)
         return
 
     fetcher = FlightFetcher(config, cache=cache, max_requests=args.max_requests)

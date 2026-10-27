@@ -1,0 +1,9 @@
+# Python bytecode and test tooling
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+
+# Runtime outputs; each search creates fresh versions locally.
+flights_cache.json
+results.csv

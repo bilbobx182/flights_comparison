@@ -95,7 +95,7 @@ Built with Python 3 and [`fast-flights`](https://pypi.org/project/fast-flights/)
 ```text
 usage: main.py [-h] [--config CONFIG] [--start-date START_DATE]
                [--end-date END_DATE] [--dry-run] [--max-requests MAX_REQUESTS]
-               [--stage STAGE] [--output-csv OUTPUT_CSV] [--no-cache]
+               [--stage {1,2,all}] [--output-csv OUTPUT_CSV] [--no-cache]
 
 Multi-city flight price finder
 
@@ -106,7 +106,7 @@ options:
   --end-date DATE       Override end date (YYYY-MM-DD)
   --dry-run             Print planned query estimation without sending network requests
   --max-requests N      Stop gracefully after N network requests and show partial results
-  --stage STAGE         Stage to run: 1 (Stage 1 only), 2, 3, 4, or all (default: all)
+  --stage {1,2,all}     Stop after Stage 2 pruning (1 or 2), or run all stages
   --output-csv FILE     Path to export CSV results (default: results.csv)
   --no-cache            Bypass disk cache loading and saving
 ```
@@ -122,6 +122,8 @@ options:
   ```bash
   python3 main.py --start-date 2027-03-01 --end-date 2027-03-07 --stage 1
   ```
+
+  Re-run without `--stage 1` to use the saved long-haul cache and complete Stages 3–4.
 
 * **Enforce a strict 20-request budget cap:**
   ```bash
