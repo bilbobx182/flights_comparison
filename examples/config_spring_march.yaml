@@ -1,0 +1,59 @@
+# Sample Configuration: Spring Test Run (March 2027)
+# Use this configuration for immediate live price searches with active airline schedules
+
+month_range:
+  start_date: "2027-03-05"
+  end_date: "2027-03-07"
+
+origin: "DUB"
+final_destination: "DUB"
+
+days_per_city:
+  china: 7
+  north_japan: 3
+  tokyo: 7
+
+slots:
+  china:
+    cities:
+      Beijing: ["PEK", "PKX"]
+      Shanghai: ["PVG", "SHA"]
+  north_japan:
+    cities:
+      Sapporo: ["CTS"]
+  tokyo:
+    cities:
+      Tokyo: ["HND", "NRT"]
+
+filters:
+  blocked_carriers:
+    - "Emirates"
+    - "Qatar Airways"
+    - "Etihad Airways"
+    - "Etihad"
+  block_turkish_airlines: false
+
+  blocked_layover_airports:
+    - "DXB"
+    - "DOH"
+    - "AUH"
+  block_istanbul_layover: false
+
+  max_stops_long_haul: 1
+  max_stops_short_haul: 2
+  max_price_per_leg: 1500
+
+pruning:
+  keep_top_dates: 5
+  slack_eur: 200
+
+politeness:
+  min_delay_seconds: 3.0
+  max_delay_seconds: 8.0
+  max_retries: 3
+  backoff_factor: 2.0
+  cache_file: "flights_cache.json"
+
+alerts:
+  enabled: false
+  alert_threshold_eur: 1800

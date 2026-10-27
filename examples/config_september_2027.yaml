@@ -1,0 +1,70 @@
+# Sample Configuration: September 2027 (Full Month Production Run)
+# 17-Day Itinerary: 7 days China, 3 days North Japan, 7 days Tokyo
+
+month_range:
+  start_date: "2027-09-01"
+  end_date: "2027-09-30"
+
+origin: "DUB"
+final_destination: "DUB"
+
+days_per_city:
+  china: 7
+  north_japan: 3
+  tokyo: 7
+
+slots:
+  china:
+    cities:
+      Beijing: ["PEK", "PKX"]
+      Shanghai: ["PVG", "SHA"]
+  north_japan:
+    cities:
+      Sapporo: ["CTS"]
+  tokyo:
+    cities:
+      Tokyo: ["HND", "NRT"]
+
+filters:
+  blocked_carriers:
+    - "Emirates"
+    - "Qatar Airways"
+    - "Etihad Airways"
+    - "Etihad"
+  block_turkish_airlines: false
+
+  blocked_layover_airports:
+    - "DXB"
+    - "DOH"
+    - "AUH"
+  block_istanbul_layover: false
+
+  max_stops_long_haul: 1
+  max_stops_short_haul: 2
+  max_price_per_leg: 1500
+
+pruning:
+  keep_top_dates: 5
+  slack_eur: 200
+
+politeness:
+  min_delay_seconds: 3.0
+  max_delay_seconds: 8.0
+  max_retries: 3
+  backoff_factor: 2.0
+  cache_file: "flights_cache.json"
+
+alerts:
+  enabled: false
+  alert_threshold_eur: 1800
+  telegram:
+    enabled: false
+    bot_token: ""
+    chat_id: ""
+  email:
+    enabled: false
+    smtp_host: "smtp.gmail.com"
+    smtp_port: 587
+    sender_email: ""
+    smtp_password: ""
+    recipient_email: ""

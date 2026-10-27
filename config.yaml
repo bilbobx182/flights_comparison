@@ -1,0 +1,86 @@
+# Multi-city flight price finder configuration
+
+# Trip start date range (default for production / monitoring: September 2027)
+month_range:
+  start_date: "2027-09-01"
+  end_date: "2027-09-30"
+
+# Fixed route origin and final destination
+origin: "DUB"
+final_destination: "DUB"
+
+# Duration spent in each destination (Total: 17 days)
+days_per_city:
+  china: 7
+  north_japan: 3
+  tokyo: 7
+
+# Airport slot candidates
+slots:
+  china:
+    cities:
+      Beijing: ["PEK", "PKX"]
+      Shanghai: ["PVG", "SHA"]
+  north_japan:
+    cities:
+      Sapporo: ["CTS"]
+      # Optional regional additions (uncomment to include):
+      # Hakodate: ["HKD"]
+      # Aomori: ["AOJ"]
+      # Sendai: ["SDJ"]
+  tokyo:
+    cities:
+      Tokyo: ["HND", "NRT"]
+
+# Exclusions and filtering
+filters:
+  # Airlines to block
+  blocked_carriers:
+    - "Emirates"
+    - "Qatar Airways"
+    - "Etihad Airways"
+    - "Etihad"
+  block_turkish_airlines: false  # Set true to also block Turkish Airlines
+
+  # Layover airport codes to block
+  blocked_layover_airports:
+    - "DXB"
+    - "DOH"
+    - "AUH"
+  block_istanbul_layover: false  # Set true to also block IST
+
+  # Max stops
+  max_stops_long_haul: 1   # DUB -> China (L1) and Tokyo -> DUB (L4)
+  max_stops_short_haul: 2  # China -> North Japan (L2) and North Japan -> Tokyo (L3)
+
+  # Sanity cap per leg (EUR)
+  max_price_per_leg: 1500
+
+# Search & pruning parameters
+pruning:
+  keep_top_dates: 5
+  slack_eur: 200
+
+# Politeness and rate-limiting
+politeness:
+  min_delay_seconds: 3.0
+  max_delay_seconds: 8.0
+  max_retries: 3
+  backoff_factor: 2.0
+  cache_file: "flights_cache.json"
+
+# Automated deal alerts (Telegram / Email)
+alerts:
+  enabled: false
+  alert_threshold_eur: 1800  # Send alert if best full itinerary <= this price
+  telegram:
+    enabled: false
+    bot_token: ""            # e.g. "123456789:ABCdefGhIJKlmNoPQRsTUVwxyZ"
+    chat_id: ""              # e.g. "987654321"
+  email:
+    enabled: false
+    smtp_host: "smtp.gmail.com"
+    smtp_port: 587
+    sender_email: ""
+    smtp_password: ""        # App password if using Gmail
+    recipient_email: ""

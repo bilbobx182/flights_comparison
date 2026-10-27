@@ -1,0 +1,3 @@
+fast-flights
+pyyaml
+typing_extensions
